@@ -1,9 +1,11 @@
 import pybullet as p
 import math
+import pkg_resources
 
 def init():
-	plane_desc = '/home/max/workspace/visiontoaction/description/plane.urdf'
-	wall_desc = '/home/max/workspace/visiontoaction/description/wall.urdf'
+	plane_desc = pkg_resources.resource_filename('gym_shapesort', 'description/plane.urdf')
+	wall_desc = pkg_resources.resource_filename('gym_shapesort', 'description/wall.urdf')
+	print(plane_desc)
 
 	arm_length = 2.0
 	wall_thickness = 0.2

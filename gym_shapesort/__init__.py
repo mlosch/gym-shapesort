@@ -6,9 +6,9 @@ logger = logging.getLogger(__name__)
 register(
     id='Reacher-v0',
     entry_point='gym_shapesort.envs:Reach',
-    timestep_limit=1000,
     reward_threshold=1.0,
     nondeterministic = True,
+    tags={'wrapper_config.TimeLimit.max_episode_steps': 1000}
 )
 
 # register(

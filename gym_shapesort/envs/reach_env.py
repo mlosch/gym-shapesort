@@ -5,6 +5,7 @@ import gym
 import numpy as np
 from random import random
 from gym import spaces
+import pkg_resources
 
 	
 def randf(start, end):
@@ -15,15 +16,19 @@ class Reach(gym.Env):
 
 		self.frame_skip = 5
 
-		p.connect(p.SHARED_MEMORY)
+		p.connect(p.GUI)
 		p.resetSimulation()
 
 		self.render_width = 224
 		self.render_height = 224
 
 		env_cage.init()
-		self.body = gripper_interface.GripperInterface(p.loadURDF('/home/max/workspace/visiontoaction/description/gripper.urdf', [-0.55,-0.55,0]))
-		self.target = p.loadURDF('/home/max/workspace/visiontoaction/description/target.urdf')
+
+		arm_desc = pkg_resources.resource_filename('gym_shapesort', 'description/gripper.urdf')
+		target_desc = pkg_resources.resource_filename('gym_shapesort', 'description/target.urdf')
+
+		self.body = gripper_interface.GripperInterface(p.loadURDF(arm_desc, [-0.55,-0.55,0]))
+		self.target = p.loadURDF(target_desc)
 
 		linkpos = self.body.getLinkStates()[0]
 		pinchpos = self.body.getPincherCentroid()

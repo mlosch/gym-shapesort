@@ -1,6 +1,3 @@
-import sys
-sys.path.append('/home/max/bullet3/build_cmake/examples/pybullet')
-
 from collections import OrderedDict
 import pybullet as p
 import math
