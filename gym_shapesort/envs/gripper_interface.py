@@ -29,35 +29,43 @@ class BodyJointInterface(object):
 	def getControlRange(self):
 		raise NotImplementedError
 
-	def reset(self):
+	def reset(self, zero_positions=None):
 		# reset velocities
 		for name, jid in self.joints.items():
 			_, jvel = self.zero_state[name]
 			self.setJointVelocity(jid, jvel)
 
+		if zero_positions is None:
+			zero_positions = [jpos for name, (jpos, jvel) in self.zero_state.items()]
+		else:
+			assert len(zero_positions) == len(self.joints)
+
 		# reset joint states
-		for name, jid in self.joints.items():
-			jpos, _ = self.zero_state[name]
+		for i, (name, jid) in enumerate(self.joints.items()):
+			jpos = zero_positions[i]
 			p.resetJointState(self.bodyid, jid, jpos)
 
 	def getJointStates(self):
 		state = [0]*len(self.joints)
+		velocities = [0]*len(self.joints)
 		for i, (name, jid) in enumerate(self.joints.items()):
 			jpos, jvel, jforces, jtorque = p.getJointState(self.bodyid, jid)
 			state[i] = jpos
-		return state
+			velocities[i] = jvel
+		return state, velocities
 
 	def getLinkStates(self):
 		worldpos = [0] * (len(self.joints)-1)
 		worldorn = [0] * (len(self.joints)-1)
+		jids = self.joints.values()
 		for i in range(len(self.joints)-1):
-			pos, orn, localinertialpos, localinertialorn, framepos, frameorn = p.getLinkState(self.bodyid, i)
+			pos, orn, localinertialpos, localinertialorn, framepos, frameorn = p.getLinkState(self.bodyid, jids[i])
 			worldpos[i] = pos
 			worldorn[i] = orn
 
 		return worldpos, worldorn
 
-	def setJointVelocity(self, jid, velocity, maxForce=5.0):
+	def setJointVelocity(self, jid, velocity, maxForce=50.0):
 		if maxForce is None:
 			p.setJointMotorControl2(
 			bodyIndex=self.bodyid, 
@@ -85,25 +93,33 @@ class GripperInterface(BodyJointInterface):
 			if jtype == p.JOINT_FIXED:
 				del self.joints[name]
 
+	def reset(self, zero_positions=None):
+		if zero_positions is not None:
+			zero_positions = list(zero_positions) + [-zero_positions[-1]]
+		super(GripperInterface, self).reset(zero_positions)
+
 	def getControlRange(self):
-		return [-2.0]*(len(self.joints)-1), [2.0]*(len(self.joints)-1)
+		return [-5.0]*(len(self.joints)-1), [5.0]*(len(self.joints)-1)
 
 	def setVelocities(self, velocities):
 		assert(velocities.size == len(self.joints) - 1)
 		# assert(len(velocities) == len(self.joints)-1)
 
-		for i in range(len(self.joints) - 1):
-			self.setJointVelocity(i, velocities[i])
+		jids = self.joints.values()
+		for i in range(len(self.joints) - 2):
+			self.setJointVelocity(jids[i], velocities[i])
 		self.setPincherVelocity(velocities[-1])
 
 	def getJointStates(self):
-		state = super(GripperInterface, self).getJointStates()
+		state, velocities = super(GripperInterface, self).getJointStates()
 		# collapse pinch states to one
 		collapsed_state = []
+		collapsed_velocities = []
 		for i in range(len(state)-1):
 			collapsed_state.append(state[i])
+			collapsed_velocities.append(velocities[i])
 
-		return collapsed_state
+		return collapsed_state, collapsed_velocities
 
 	def setWristVelocity(self, velocity):
 		pwrist = self.joints['joint_wrist_x']

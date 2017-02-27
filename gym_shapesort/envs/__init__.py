@@ -1,1 +1,1 @@
-from gym_shapesort.envs.reach_env import Reach
+from gym_shapesort.envs.reacher import Reacher
