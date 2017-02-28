@@ -27,7 +27,7 @@ register(
     	'obs_type': 'rgb', 
     	'render_width': 112, 
     	'render_height': 112, 
-    	'pybullet_mode': 'SHARED_MEMORY'
+    	'pybullet_mode': 'DIRECT'
     }
 )
 
@@ -40,9 +40,9 @@ register(
     kwargs={
     	'frame_skip': 2,
     	'obs_type': 'birgb', 
-    	'render_width': 112, 
-    	'render_height': 112, 
-    	'pybullet_mode': 'SHARED_MEMORY'
+    	'render_width': 224, 
+    	'render_height': 224, 
+    	'pybullet_mode': 'DIRECT'
     }
 )
 
@@ -57,7 +57,7 @@ register(
     	'obs_type': 'rgbd', 
     	'render_width': 112, 
     	'render_height': 112, 
-    	'pybullet_mode': 'SHARED_MEMORY'
+    	'pybullet_mode': 'DIRECT'
     }
 )
 
